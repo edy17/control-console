@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cc-ingress
+  annotations:
+    kubernetes.io/ingress.class: "public-iks-k8s-nginx"
+spec:
+  rules:
+    - host: cc.ddsl-fra04-572929c00c95d77bf7959a5e64f39a33-0000.eu-de.containers.appdomain.cloud
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cc-aggregator-service
+                port:
+                  number: 80
+    - host: probe.ddsl-fra04-572929c00c95d77bf7959a5e64f39a33-0000.eu-de.containers.appdomain.cloud
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cc-probe-service
+                port:
+                  number: 80

@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cc-probe-deployment
+spec:
+  replicas: 1
+  minReadySeconds: 15
+  selector:
+    matchLabels:
+      app: cc-probe
+  template:
+    metadata:
+      labels:
+        app: cc-probe
+    spec:
+      serviceAccountName: probe-agent
+      automountServiceAccountToken: true
+      containers:
+        - image: registry.access.redhat.com/ubi8/ubi-minimal:8.6
+          imagePullPolicy: Always
+          name: cc-probe
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: cc-config
+      imagePullSecrets:
+        - name: regcred

@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cc-aggregator-deployment
+spec:
+  replicas: 1
+  minReadySeconds: 15
+  selector:
+    matchLabels:
+      app: cc-aggregator
+  template:
+    metadata:
+      labels:
+        app: cc-aggregator
+    spec:
+      containers:
+        - image: registry.access.redhat.com/ubi8/ubi-minimal:8.6
+          imagePullPolicy: Always
+          name: cc-aggregator
+          ports:
+            - containerPort: 8080
+      imagePullSecrets:
+        - name: regcred

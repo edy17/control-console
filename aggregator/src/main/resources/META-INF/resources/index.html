@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>k8s cluster control console</title>
+  <link rel="stylesheet" type="text/css"
+        href="https://cdnjs.cloudflare.com/ajax/libs/patternfly/3.24.0/css/patternfly.min.css">
+  <link rel="stylesheet" type="text/css"
+        href="https://cdnjs.cloudflare.com/ajax/libs/patternfly/3.24.0/css/patternfly-additions.min.css">
+
+  <style>
+      .socket {
+          resize: none;
+          overflow: hidden;
+          min-height: 500px;
+          max-height: 500px;
+          overflow-x: auto;
+          overflow-y: auto;
+      }
+  </style>
+</head>
+
+<body>
+<nav class="navbar navbar-default navbar-pf" role="navigation">
+  <div class="navbar-header">
+    <a class="navbar-brand" href="/">
+      <p><strong>k8s cluster control console</strong></p>
+    </a>
+  </div>
+</nav>
+<div class="container-fluid" style="margin-left: 10px;margin-right: 10px;">
+  <br/>
+  <div class="row">
+    <textarea class="col-md-12 socket" id="cps"></textarea>
+  </div>
+  <br/>
+  <div class="row">
+    <a class="col-md-1 btn btn-primary" id="download" download="file">Download as CSV</a>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/patternfly/3.24.0/js/patternfly.min.js"></script>
+<script type="text/javascript">
+
+  let protocol = "https://";
+  if (location.host === "localhost:8080") {
+    protocol = "http://"
+  }
+
+  const updateClusters = function () {
+    fetch(protocol + location.host + "/collected-clusters").then(response => response.text()).then(data => {
+          $("#cps").append(data + "\n");
+          scrollCsToBottom();
+        }
+    );
+  };
+
+  const scrollCsToBottom = function () {
+    $('#cps').scrollTop($('#cps')[0].scrollHeight);
+  };
+
+  const downloadCSV = function () {
+    fetch(protocol + location.host + "/collected-clusters/download", { method: 'get', mode: 'no-cors', referrerPolicy: 'no-referrer' })
+    .then(res => res.blob())
+    .then(res => {
+      const aElement = document.createElement('a');
+      aElement.setAttribute('download', "clusters_healthy.csv");
+      const href = URL.createObjectURL(res);
+      aElement.href = href;
+      aElement.setAttribute('target', '_blank');
+      aElement.click();
+      URL.revokeObjectURL(href);
+    });
+  };
+
+  //Process
+  $(document).ready(function () {
+    $("#cps").change(function () {
+      scrollCsToBottom();
+    });
+
+    updateClusters()
+
+    window.setInterval(updateClusters, 5000);
+  });
+
+  document.querySelector('#download').onclick =function () {
+    downloadCSV();
+  }
+
+</script>
+</body>
+</html>
